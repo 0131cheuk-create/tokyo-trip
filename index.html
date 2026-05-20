@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ LEO 老哥帶團去東京 ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght=700&family=Noto+Sans+HK:wght=400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Noto Sans HK', 'Comic Neue', sans-serif; 
+            background-color: #FFFBF0; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .chiikawa-shadow { box-shadow: 0 6px 0px #E6D5B8; }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="text-gray-700 min-h-screen max-w-md mx-auto bg-[#FFFBF0] relative pb-12 shadow-sm">
+    <div id="app" v-cloak>
+        
+        <header class="bg-[#FFDEE9] bg-gradient-to-r from-[#FFDEE9] to-[#B5FFFC] p-5 pt-8 rounded-b-[2rem] text-center border-b-4 border-[#FFAEAE]">
+            <div class="inline-block bg-white/80 backdrop-blur-sm px-3 py-0.5 rounded-full text-[11px] font-bold text-[#FF6B8B] mb-1.5 border border-[#FFAEAE]">
+                <i class="fa-solid fa-plane-departure mr-1"></i> HB320 ➔ HB321
+            </div>
+            <h1 class="text-lg font-black text-[#513C2A] tracking-wider">✨ LEO 老哥帶團去東京 ✨</h1>
+            <p class="text-[10px] text-[#7A624E] mt-0.5 font-bold">5月24日 ~ 5月30日 ‧ 7 Days Live!</p>
+        </header>
+
+        <div class="px-4 mt-4">
+            <div class="bg-white rounded-2xl p-4 border-2 border-[#D4E6F1] chiikawa-shadow mb-4">
+                <div class="flex justify-between items-center mb-1.5 pb-1.5 border-b border-dashed border-gray-200">
+                    <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
+                        <i class="fa-solid fa-hotel mr-1"></i> 住宿飯店
+                    </span>
+                    <a href="https://maps.google.com/?q=KOKO+HOTEL+Ikebukuro+Higashi" target="_blank" class="text-xs text-[#FF6B8B] font-bold underline">
+                        地圖導航 <i class="fa-solid fa-location-dot"></i>
+                    </a>
+                </div>
+                <p class="font-bold text-sm text-gray-800">KOKO酒店池袋東 (KOKO HOTEL)</p>
+                <p class="text-[11px] text-gray-500 mt-1">💡 全程直達免搬行李！回程於池袋站搭 Skyliner 車 (12:22)</p>
+            </div>
+        </div>
+
+        <div class="sticky top-0 z-40 bg-[#FFFBF0]/90 backdrop-blur-md py-2.5 shadow-sm border-b border-gray-100">
+            <div class="flex overflow-x-auto px-4 space-x-2.5 no-scrollbar snap-x">
+                <button v-for="(day, index) in itinerary" :key="index" @click="activeDay = index" class="flex-shrink-0 w-16 py-1.5 rounded-xl border-2 transition-all text-center snap-center" :class="activeDay === index ? 'bg-[#FFD1DC] border-[#FF6B8B] text-[#513C2A] font-black scale-105' : 'bg-white border-[#E6D5B8] text-gray-400'">
+                    <div class="text-[9px]">Day {{ index + 1 }}</div>
+                    <div class="text-xs font-bold">{{ day.date.split('月')[1] }}</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="px-4 mt-3">
+            <div class="bg-[#FFF0F5] rounded-xl p-3 border border-[#FFC0CB] flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] font-bold text-[#FF6B8B]">當日焦點</span>
+                    <h2 class="text-base font-black text-[#513C2A]">{{ currentDay.area }}</h2>
+                </div>
+                <div class="bg-white/90 px-2.5 py-0.5 rounded-lg text-center border border-[#FFC0CB] text-[11px] font-bold text-gray-600">
+                    ⛅ {{ currentDay.temp }}
+                </div>
+            </div>
+        </div>
+
+        <div class="px-4 mt-4 space-y-3">
+            <div v-for="(event, i) in currentDay.events" :key="i" class="flex space-x-2.5 items-start">
+                <div class="w-12 text-right pt-1.5 flex-shrink-0">
+                    <span class="text-[10px] font-mono font-bold bg-[#7A624E] text-white px-1 py-0.5 rounded shadow-sm">{{ event.time }}</span>
+                </div>
+                <div class="flex-1 bg-white rounded-xl p-3 border-2 border-[#E6D5B8] chiikawa-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-black text-gray-800 text-xs flex items-center"><span class="mr-1">{{ event.icon }}</span> {{ event.title }}</h3>
+                            <p class="text-[11px] text-gray-500 mt-1 whitespace-pre-line leading-relaxed">{{ event.desc }}</p>
+                        </div>
+                        <a v-if="event.location" :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event.location)" target="_blank" class="bg-[#E6F2FF] text-blue-600 p-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center flex-shrink-0 ml-2">
+                            <i class="fa-solid fa-location-arrow"></i><span class="scale-90 mt-0.5">導航</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center py-8 text-[10px] text-gray-400 font-bold">
+            <p>ヘ( ^o^)ノ 衝啊！！！買爆 Chiikawa 公仔～ 🛒</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+        createApp({
+            setup() {
+                const activeDay = ref(0);
+                const itinerary = ref([
+                    { date: '5月24日', week: '星期日', area: '香港 ➔ 東京池袋', temp: '18°C - 24°C', events: [{ time: '09:05', title: '香港國際機場起飛', desc: '航班 HB320 (09:05-14:50)，行李限額20KG\n上雞啦！✈️', icon: '✈️' }, { time: '14:50', title: '抵達東京成田機場', desc: '行行企企等過關、攞行李 🎒', icon: '🛬' }, { time: '15:30', title: '搭 Skyliner 前往池袋', desc: '車程約60分鐘，車費 2760yen\n成田機場 ➔ 池袋', icon: '🚆', location: '成田空港第2ビル駅' }, { time: '18:00', title: '酒店 Check-in', desc: 'KOKO酒店池袋東下榻（池袋太陽城）', icon: '🏨', location: 'KOKO HOTEL Ikebukuro Higashi' }] },
+                    { date: '5月25日', week: '星期一', area: '台場 / 豐洲', temp: '17°C - 23°C', events: [{ time: '10:00', title: '出發前往豐洲市場', desc: '池袋 ➔ 豐洲市場 (車程40mins)', icon: '🚃', location: '豐洲市場' }, { time: '11:00', title: '豐洲市場食壽司/魚生Don', desc: '千客萬來掃街、足湯浸浸 ♨️', icon: '🍣', location: '東京豐洲萬葉俱樂部' }, { time: '15:30', title: '豐洲 ➔ 台場', desc: '車程約 15 分鐘 🚌', icon: '🚌' }, { time: '16:00', title: '台場行街 & Joypolis', desc: '暢玩室內主題樂園、睇高達 👾', icon: '👾', location: '東京Joypolis' }, { time: '19:00', title: '返歸池袋', desc: '酒店休息或周圍搵嘢食 🛌', icon: '🛌' }] },
+                    { date: '5月26日', week: '星期二', area: '涉谷 / 自由之丘 / 原宿', temp: '19°C - 25°C', events: [{ time: '10:00', title: '池袋周圍行下', desc: '睇下野，感受上午的池袋 🚶', icon: '🚶' }, { time: '12:00', title: '午餐：食河豚 @ 池袋', desc: '【已卜！】美味河豚料理大餐 🐡', icon: '🍱', location: '玄品 河豚 池袋' }, { time: '13:30', title: '池袋 ➔ 涉谷', desc: '車程30分鐘 🚃', icon: '🚃' }, { time: '14:00', title: '涉谷/自由之丘/原宿散策', desc: '再周圍行下，消化下 🛍️', icon: '🛍️', location: '渋谷駅' }, { time: '15:20', title: 'Shibuya Sky 高空觀景', desc: '【已卜 15:20！】俯瞰東京全景 ☁️', icon: '☁️', location: 'SHIBUYA SKY' }, { time: '17:30', title: '無咩野做就ON99周圍行下', desc: '逛街、睇野、感受日本潮流 🤪', icon: '🤪' }] },
+                    { date: '5月27日', week: '星期三', area: '東京迪士尼海洋 🌊', temp: '18°C - 24°C', events: [{ time: '07:00', title: '池袋出發 ➔ 迪士尼海洋', desc: '車程約60分鐘，提早去卡位！🏰', icon: '🏰', location: '東京迪士尼海洋' }, { time: '08:30', title: '迪士尼海洋 瘋狂開玩', desc: '必玩：\n1. 魔雪奇緣：安娜與艾莎的冰雪之旅❄️\n2. 翱翔：騰空飛翔✈️\n3. 玩具總動員瘋狂遊戲屋🎯\n4. 驚魂古塔😱\n5. 地心探險之旅🌋\n6. 樂佩公主天燈盛會🏮', icon: '🎢' }, { time: '19:30', title: '夜間水上大匯演', desc: '堅信！～海洋之願～ 必睇！🌟', icon: '🎆' }, { time: '21:30', title: '返歸池袋酒店', desc: '帶住滿滿戰利品回程 🛌', icon: '🛌' }] },
+                    { date: '5月28日', week: '星期外', area: '川越小江戶一日遊 🪵', temp: '16°C - 22°C', events: [{ time: '09:30', title: '池袋 ➔ 川越', desc: '搭東武東上線，用 KAWAGOE DISCOUNT PASS 🚆', icon: '🚆', location: '池袋駅' }, { time: '10:30', title: '川越 gogogo!', desc: '熊野神社：洗錢錢 🪙\n小川菊：食鰻魚飯 (落地之後即刻去拎飛 ❗)', icon: '🍱', location: '小川菊' }, { time: '13:30', title: '藏造老街 & 時之鐘', desc: '行街街買 chiikawa 公仔卡哇哇 🥹\n星巴克川越鐘樓店 ☕', icon: '🛍️', location: '川越時之鐘' }, { time: '15:30', title: '冰川神社', desc: '釣鯛魚御守 🐟 祈求好緣分', icon: '⛩️', location: '川越冰川神社' }] },
+                    { date: '5月29日', week: '星期五', area: '秋葉原 / 東京車站 🛍️', temp: '18°C - 25°C', events: [{ time: '10:00', title: '出發去食 I\'m donut ?', desc: '超人氣生甜甜圈，準備排隊！🍩', icon: '🍩', location: 'I\'m donut? 中目黑' }, { time: '11:30', title: '食完出發：池袋 ➔ 秋葉原', desc: '車程約 20 分鐘 🚃', icon: '🚃' }, { time: '12:00', title: '秋葉原行行行', desc: '去下女僕男執事 cafe 🧸', icon: '🧸', location: '秋葉原駅' }, { time: '16:15', title: '秋葉原 ➔ 東京站', desc: '車程5分鐘 🚃', icon: '🚃' }, { time: '16:30', title: '東京站一番街狂購', desc: '東京車站一番街買手信買手信！🛍️ 最後衝刺！', icon: '🎁', location: '東京車站一番街' }] },
+                    { date: '5月30日', week: '星期六', area: '東京池袋 ➔ 香港', temp: '19°C - 26°C', events: [{ time: '09:00', title: '最後衝刺啦!!!!!', desc: '池袋最後補貨、買藥妝、吃早餐 🔥', icon: '🔥' }, { time: '11:30', title: '池袋站出發 ➔ 機場', desc: '12:22 搭 Skyliner 車，13:00 到達機場 🚆', icon: '🚆', location: '池袋駅' }, { time: '15:50', title: '飛機起飛返港 (HB321)', desc: '要返歸啦!!!要回到現實世界啦~~嗚嗚嗚~~~😭 (15:50-19:45)', icon: '✈️' }, { time: '19:45', title: '抵達香港 (T1)', desc: '回到十汁吉吉的家 🏠，完美的假期結束！', icon: '🏠' }] }
+                ]);
+                const currentDay = computed(() => itinerary.value[activeDay.value]);
+                return { activeDay, itinerary, currentDay };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -40,7 +40,7 @@
                 <div class="bg-white rounded-2xl p-4 border-2 border-[#D4E6F1] chiikawa-shadow mb-4">
                     <div class="flex justify-between items-center mb-1.5 pb-1.5 border-b border-dashed border-gray-200">
                         <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-hotel mr-1"></i> 住宿飯店</span>
-                        <a href="http://googleusercontent.com/maps.google.com" target="_blank" class="text-xs text-[#FF6B8B] font-bold underline">地圖導航 <i class="fa-solid fa-location-dot"></i></a>
+                        <a href="https://maps.google.com" target="_blank" class="text-xs text-[#FF6B8B] font-bold underline">地圖導航 <i class="fa-solid fa-location-dot"></i></a>
                     </div>
                     <p class="font-bold text-sm text-gray-800">KOKO酒店池袋東 (KOKO HOTEL)</p>
                     <p class="text-[11px] text-gray-500 mt-1">💡 全程直達免搬行李！回程於池袋站搭 Skyliner 車 (12:22)</p>
@@ -79,7 +79,7 @@
                                 <h3 class="font-black text-gray-800 text-xs flex items-center"><span class="mr-1">{{ event.icon }}</span> {{ event.title }}</h3>
                                 <p class="text-[11px] text-gray-500 mt-1 whitespace-pre-line leading-relaxed">{{ event.desc }}</p>
                             </div>
-                            <a v-if="event.location" :href="'http://googleusercontent.com/maps.google.com?q=' + encodeURIComponent(event.location)" target="_blank" class="bg-[#E6F2FF] text-blue-600 p-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center flex-shrink-0 ml-2">
+                            <a v-if="event.location" :href="'https://maps.google.com?q=' + encodeURIComponent(event.location)" target="_blank" class="bg-[#E6F2FF] text-blue-600 p-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center flex-shrink-0 ml-2">
                                 <i class="fa-solid fa-location-arrow"></i><span class="scale-90 mt-0.5">導航</span>
                             </a>
                         </div>
@@ -88,11 +88,14 @@
             </div>
         </div>
 
-
         <div v-if="currentTab === 'ledger'" class="px-4 mt-4 space-y-4 pb-12">
             
-            <div class="bg-[#E8F8F5] rounded-xl p-2.5 text-center text-xs font-bold text-teal-700 border border-[#A3E4D7]">
-                💱 當前匯率設定：100 JPY = {{ fxRate }} HKD
+            <div class="flex justify-between items-center text-xs font-bold px-1">
+                <span class="text-teal-700">💱 100 JPY = {{ fxRate }} HKD</span>
+                <span :class="syncing ? 'text-orange-500 animate-pulse' : 'text-green-600'">
+                    <i class="fa-solid" :class="syncing ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'"></i>
+                    {{ syncing ? ' 雲端同步中...' : ' Google Drive 已同步' }}
+                </span>
             </div>
 
             <div class="bg-white rounded-2xl p-4 border-2 border-[#E6D5B8] chiikawa-shadow">
@@ -160,8 +163,8 @@
                     </label>
                 </div>
 
-                <button @click="addRecord" class="w-full bg-[#FF6B8B] text-white py-2 rounded-xl text-xs font-black shadow-md hover:bg-[#ff5579] transition-all">
-                    ➕ 記錄並即時分帳
+                <button @click="addRecord" :disabled="syncing" class="w-full bg-[#FF6B8B] text-white py-2 rounded-xl text-xs font-black shadow-md hover:bg-[#ff5579] transition-all disabled:bg-gray-300">
+                    ➕ 記錄並即時分帳 (上傳 Google)
                 </button>
             </div>
 
@@ -171,7 +174,8 @@
                         <i class="fa-solid fa-list-check mr-1.5 text-purple-500"></i> 流水明細紀錄
                     </h3>
                     <div class="flex items-center space-x-2">
-                        <button @click="clearAllRecords" v-if="records.length > 0" class="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">🧹 清空帳目</button>
+                        <button @click="fetchRecords" class="text-[10px] text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200"><i class="fa-solid fa-rotate mr-0.5"></i> 刷新</button>
+                        <button @click="clearAllRecords" v-if="records.length > 0" class="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">🧹 清空</button>
                         <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-400 font-bold">共 {{ records.length }} 筆</span>
                     </div>
                 </div>
@@ -205,22 +209,25 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <footer class="text-center py-6 text-[10px] text-gray-400 font-bold">
             <p>ヘ( ^o^)ノ 衝啊！！！買爆 Chiikawa 公仔～ 🛒</p>
         </footer>
-
     </div>
 
     <script>
-        const { createApp, ref, computed, watch } = Vue;
+        const { createApp, ref, computed, watch, onMounted } = Vue;
+        
+        // 🚀 已幫老哥自動填寫好你的 Google 雲端網址
+        const gasUrl = 'https://script.google.com/macros/s/AKfycbyOa26jRLgICxG4CcFbbqBRv1WXxglAQ2XsLCSwxGFiqPBa-xWW3kVge8Ch19BKDBHu/exec';
+
         createApp({
             setup() {
                 const currentTab = ref('itinerary');
                 const activeDay = ref(0);
-                const fxRate = ref(5.1); // 預設 100 JPY = 5.1 HKD
+                const fxRate = ref(5.1);
+                const syncing = ref(false);
 
                 const members = ref([
                     { id: 'leo', name: 'Leo 小哥', avatar: '🐻', totalPaid: 0, balance: 0 },
@@ -231,19 +238,47 @@
                 ]);
 
                 const form = ref({
-                    title: '',
-                    amount: null,
-                    currency: 'JPY',
-                    payer: 'leo',
-                    targets: ['leo', 'yan', 'sister1', 'sister2', 'yi'], // 修正：初始確保為字串ID陣列
-                    type: '公數'
+                    title: '', amount: null, currency: 'JPY', payer: 'leo',
+                    targets: ['leo', 'yan', 'sister1', 'sister2', 'yi'], type: '公數'
                 });
 
-                // 從 LocalStorage 讀取數據
-                const savedRecords = localStorage.getItem('leo_tokyo_ledger');
-                const records = ref(savedRecords ? JSON.parse(savedRecords) : [
-                    { id: 1, title: '預支迪士尼海洋門票', amountRaw: 45000, amountHKD: 2295, currency: 'JPY', payer: 'leo', targets: ['leo', 'yan', 'sister1', 'sister2', 'yi'], type: '公數', timestamp: Date.now() - 100000 }
-                ]);
+                const records = ref([]);
+
+                const fetchRecords = async () => {
+                    if (!gasUrl) return;
+                    syncing.value = true;
+                    try {
+                        const res = await fetch(gasUrl);
+                        const data = await res.json();
+                        records.value = Array.isArray(data) ? data : [];
+                    } catch (e) {
+                        console.error("下載失敗", e);
+                    } finally {
+                        syncing.value = false;
+                    }
+                };
+
+                const uploadRecords = async (targetRecords) => {
+                    if (!gasUrl) return;
+                    syncing.value = true;
+                    try {
+                        await fetch(gasUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(targetRecords)
+                        });
+                        setTimeout(fetchRecords, 800);
+                    } catch (e) {
+                        console.error("上傳失敗", e);
+                        syncing.value = false;
+                    }
+                };
+
+                onMounted(() => {
+                    fetchRecords();
+                    setInterval(fetchRecords, 30000);
+                });
 
                 const formatNum = (num) => {
                     if (num === null || isNaN(num)) return '0';
@@ -261,11 +296,8 @@
 
                 const toggleTarget = (id) => {
                     const idx = form.value.targets.indexOf(id);
-                    if (idx > -1) {
-                        form.value.targets.splice(idx, 1);
-                    } else {
-                        form.value.targets.push(id);
-                    }
+                    if (idx > -1) form.value.targets.splice(idx, 1);
+                    else form.value.targets.push(id);
                 };
 
                 const addRecord = () => {
@@ -279,7 +311,7 @@
                         amtHKD = (form.value.amount / 100) * fxRate.value;
                     }
 
-                    records.value.push({
+                    const newRecords = [...records.value, {
                         id: Date.now(),
                         title: form.value.title,
                         amountRaw: form.value.amount,
@@ -289,38 +321,41 @@
                         targets: [...form.value.targets],
                         type: form.value.type,
                         timestamp: Date.now()
-                    });
+                    }];
+
+                    records.value = newRecords;
+                    uploadRecords(newRecords);
 
                     form.value.title = '';
                     form.value.amount = null;
                 };
 
                 const deleteRecord = (id) => {
-                    records.value = records.value.filter(r => r.id !== id);
-                };
-
-                const clearAllRecords = () => {
-                    if (confirm('🧹 確定要清空所有記帳明細嗎？（清空後將無法復原）')) {
-                        records.value = [];
+                    if(confirm('確定要刪除這筆帳目嗎？')){
+                        const newRecords = records.value.filter(r => r.id !== id);
+                        records.value = newRecords;
+                        uploadRecords(newRecords);
                     }
                 };
 
-                // 核心監聽：即時動態精確連動數據計算
-                watch(records, (newRecords) => {
-                    localStorage.setItem('leo_tokyo_ledger', JSON.stringify(newRecords));
+                const clearAllRecords = () => {
+                    if (confirm('🧹 確定要清空雲端所有記帳明細嗎？')) {
+                        records.value = [];
+                        uploadRecords([]);
+                    }
+                };
 
-                    // 重設數據
+                watch(records, (newRecords) => {
                     members.value.forEach(m => {
                         m.totalPaid = 0;
                         m.balance = 0;
                     });
 
-                    // 重新跑分帳邏輯
                     newRecords.forEach(r => {
                         const payerObj = members.value.find(m => m.id === r.payer);
                         if (payerObj) {
                             payerObj.totalPaid += r.amountHKD;
-                            payerObj.balance += r.amountHKD; // 付錢的人先加上收回全款的權益
+                            payerObj.balance += r.amountHKD;
                         }
 
                         const shareCount = r.targets.length;
@@ -328,19 +363,16 @@
                             const perShare = r.amountHKD / shareCount;
                             r.targets.forEach(targetId => {
                                 const targetObj = members.value.find(m => m.id === targetId);
-                                if (targetObj) {
-                                    targetObj.balance -= perShare; // 每位參與分攤的人扣除應付份額
-                                }
+                                if (targetObj) targetObj.balance -= perShare;
                             });
                         }
                     });
-                }, { Taylor: true, immediate: true, deep: true });
+                }, { immediate: true, deep: true });
 
                 const sortedRecords = computed(() => {
                     return [...records.value].sort((a, b) => b.timestamp - a.timestamp);
                 });
 
-                // 固定行程資料
                 const itinerary = ref([
                     { date: '5月24日', week: '星期日', area: '香港 ➔ 東京池袋', temp: '18°C - 24°C', events: [{ time: '09:05', title: '香港國際機場起飛', desc: '航班 HB320 (09:05-14:50)，行李限額20KG\n上飛機啦！✈️', icon: '✈️' }, { time: '14:50', title: '抵達東京成田機場', desc: '行行企企等過關、攞行李 🎒', icon: '🛬' }, { time: '15:30', title: '搭 Skyliner 前往池袋', desc: '車程約60分鐘，車費 2760yen\n成田機場 ➔ 池袋', icon: '🚆', location: '成田空港第2ビル駅' }, { time: '18:00', title: '酒店 Check-in', desc: 'KOKO酒店池袋東下榻（池袋太陽城附近）', icon: '🏨', location: 'KOKO HOTEL Ikebukuro Higashi' }] },
                     { date: '5月25日', week: '星期一', area: '台場 / 豐洲', temp: '17°C - 23°C', events: [{ time: '10:00', title: '出發前往豐洲市場', desc: '池袋 ➔ 豐洲市場 (車程40mins)', icon: '🚃', location: '豐洲市場' }, { time: '11:00', title: '豐洲市場食壽司/魚生Don', desc: '千客萬來掃街、足湯浸浸 ♨️', icon: '🍣', location: '東京豐洲萬葉俱樂部' }, { time: '15:30', title: '豐洲 ➔ 台場', desc: '車程約 15 分鐘 🚌', icon: '🚌' }, { time: '16:00', title: '台場行街 & Joypolis', desc: '暢玩室內主題樂園、睇高達 👾', icon: '👾', location: '東京Joypolis' }, { time: '19:00', title: '返歸池袋', desc: '酒店休息或周圍搵嘢食 🛌', icon: '🛌' }] },
@@ -355,8 +387,8 @@
 
                 return {
                     currentTab, activeDay, itinerary, currentDay,
-                    members, form, records, fxRate,
-                    formatNum, getMemberName, selectAllTargets, toggleTarget, addRecord, deleteRecord, clearAllRecords, sortedRecords
+                    members, form, records, fxRate, syncing,
+                    formatNum, getMemberName, selectAllTargets, toggleTarget, addRecord, deleteRecord, clearAllRecords, sortedRecords, fetchRecords
                 };
             }
         }).mount('#app');

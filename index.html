@@ -9,17 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght=700&family=Noto+Sans+HK:wght=400;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Noto Sans HK', 'Comic Neue', sans-serif; 
-            background-color: #FFFBF0; 
-        }
+        body { font-family: 'Noto Sans HK', 'Comic Neue', sans-serif; background-color: #FFFBF0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .chiikawa-shadow { box-shadow: 0 6px 0px #E6D5B8; }
         [v-cloak] { display: none; }
     </style>
 </head>
-<body class="text-gray-700 min-h-screen max-w-md mx-auto bg-[#FFFBF0] relative pb-12 shadow-sm">
+<body class="text-gray-700 min-h-screen max-w-md mx-auto bg-[#FFFBF0] relative pb-16 shadow-sm">
     <div id="app" v-cloak>
         
         <header class="bg-[#FFDEE9] bg-gradient-to-r from-[#FFDEE9] to-[#B5FFFC] p-5 pt-8 rounded-b-[2rem] text-center border-b-4 border-[#FFAEAE]">
@@ -27,86 +24,334 @@
                 <i class="fa-solid fa-plane-departure mr-1"></i> HB320 ➔ HB321
             </div>
             <h1 class="text-lg font-black text-[#513C2A] tracking-wider">✨ LEO 老哥帶團去東京 ✨</h1>
-            <p class="text-[10px] text-[#7A624E] mt-0.5 font-bold">5月24日 ~ 5月30日 ‧ 7 Days Live!</p>
-        </header>
-
-        <div class="px-4 mt-4">
-            <div class="bg-white rounded-2xl p-4 border-2 border-[#D4E6F1] chiikawa-shadow mb-4">
-                <div class="flex justify-between items-center mb-1.5 pb-1.5 border-b border-dashed border-gray-200">
-                    <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
-                        <i class="fa-solid fa-hotel mr-1"></i> 住宿飯店
-                    </span>
-                    <a href="https://maps.google.com/?q=KOKO+HOTEL+Ikebukuro+Higashi" target="_blank" class="text-xs text-[#FF6B8B] font-bold underline">
-                        地圖導航 <i class="fa-solid fa-location-dot"></i>
-                    </a>
-                </div>
-                <p class="font-bold text-sm text-gray-800">KOKO酒店池袋東 (KOKO HOTEL)</p>
-                <p class="text-[11px] text-gray-500 mt-1">💡 全程直達免搬行李！回程於池袋站搭 Skyliner 車 (12:22)</p>
-            </div>
-        </div>
-
-        <div class="sticky top-0 z-40 bg-[#FFFBF0]/90 backdrop-blur-md py-2.5 shadow-sm border-b border-gray-100">
-            <div class="flex overflow-x-auto px-4 space-x-2.5 no-scrollbar snap-x">
-                <button v-for="(day, index) in itinerary" :key="index" @click="activeDay = index" class="flex-shrink-0 w-16 py-1.5 rounded-xl border-2 transition-all text-center snap-center" :class="activeDay === index ? 'bg-[#FFD1DC] border-[#FF6B8B] text-[#513C2A] font-black scale-105' : 'bg-white border-[#E6D5B8] text-gray-400'">
-                    <div class="text-[9px]">Day {{ index + 1 }}</div>
-                    <div class="text-xs font-bold">{{ day.date.split('月')[1] }}</div>
+            
+            <div class="mt-4 flex bg-white/60 p-1 rounded-xl border border-[#FFAEAE]">
+                <button @click="currentTab = 'itinerary'" :class="currentTab === 'itinerary' ? 'bg-[#FF6B8B] text-white shadow-sm' : 'text-gray-600'" class="flex-1 py-1.5 rounded-lg text-xs font-black transition-all">
+                    <i class="fa-solid fa-calendar-days mr-1"></i> 行程表 📅
+                </button>
+                <button @click="currentTab = 'ledger'" :class="currentTab === 'ledger' ? 'bg-[#FF6B8B] text-white shadow-sm' : 'text-gray-600'" class="flex-1 py-1.5 rounded-lg text-xs font-black transition-all">
+                    <i class="fa-solid fa-calculator mr-1"></i> 記帳分帳 💰
                 </button>
             </div>
-        </div>
+        </header>
 
-        <div class="px-4 mt-3">
-            <div class="bg-[#FFF0F5] rounded-xl p-3 border border-[#FFC0CB] flex justify-between items-center">
-                <div>
-                    <span class="text-[10px] font-bold text-[#FF6B8B]">當日焦點</span>
-                    <h2 class="text-base font-black text-[#513C2A]">{{ currentDay.area }}</h2>
-                </div>
-                <div class="bg-white/90 px-2.5 py-0.5 rounded-lg text-center border border-[#FFC0CB] text-[11px] font-bold text-gray-600">
-                    ⛅ {{ currentDay.temp }}
+        <div v-if="currentTab === 'itinerary'">
+            <div class="px-4 mt-4">
+                <div class="bg-white rounded-2xl p-4 border-2 border-[#D4E6F1] chiikawa-shadow mb-4">
+                    <div class="flex justify-between items-center mb-1.5 pb-1.5 border-b border-dashed border-gray-200">
+                        <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-hotel mr-1"></i> 住宿飯店</span>
+                        <a href="https://maps.google.com" target="_blank" class="text-xs text-[#FF6B8B] font-bold underline">地圖導航 <i class="fa-solid fa-location-dot"></i></a>
+                    </div>
+                    <p class="font-bold text-sm text-gray-800">KOKO酒店池袋東 (KOKO HOTEL)</p>
+                    <p class="text-[11px] text-gray-500 mt-1">💡 全程直達免搬行李！回程於池袋站搭 Skyliner 車 (12:22)</p>
                 </div>
             </div>
-        </div>
 
-        <div class="px-4 mt-4 space-y-3">
-            <div v-for="(event, i) in currentDay.events" :key="i" class="flex space-x-2.5 items-start">
-                <div class="w-12 text-right pt-1.5 flex-shrink-0">
-                    <span class="text-[10px] font-mono font-bold bg-[#7A624E] text-white px-1 py-0.5 rounded shadow-sm">{{ event.time }}</span>
+            <div class="sticky top-0 z-40 bg-[#FFFBF0]/90 backdrop-blur-md py-2.5 shadow-sm border-b border-gray-100">
+                <div class="flex overflow-x-auto px-4 space-x-2.5 no-scrollbar snap-x">
+                    <button v-for="(day, index) in itinerary" :key="index" @click="activeDay = index" class="flex-shrink-0 w-16 py-1.5 rounded-xl border-2 transition-all text-center snap-center" :class="activeDay === index ? 'bg-[#FFD1DC] border-[#FF6B8B] text-[#513C2A] font-black scale-105' : 'bg-white border-[#E6D5B8] text-gray-400'">
+                        <div class="text-[9px]">Day {{ index + 1 }}</div>
+                        <div class="text-xs font-bold">{{ day.date.split('月')[1] }}</div>
+                    </button>
                 </div>
-                <div class="flex-1 bg-white rounded-xl p-3 border-2 border-[#E6D5B8] chiikawa-shadow">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-black text-gray-800 text-xs flex items-center"><span class="mr-1">{{ event.icon }}</span> {{ event.title }}</h3>
-                            <p class="text-[11px] text-gray-500 mt-1 whitespace-pre-line leading-relaxed">{{ event.desc }}</p>
+            </div>
+
+            <div class="px-4 mt-3">
+                <div class="bg-[#FFF0F5] rounded-xl p-3 border border-[#FFC0CB] flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] font-bold text-[#FF6B8B]">當日焦點</span>
+                        <h2 class="text-base font-black text-[#513C2A]">{{ currentDay.area }}</h2>
+                    </div>
+                    <div class="bg-white/90 px-2.5 py-0.5 rounded-lg text-center border border-[#FFC0CB] text-[11px] font-bold text-gray-600">
+                        ⛅ {{ currentDay.temp }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 mt-4 space-y-3">
+                <div v-for="(event, i) in currentDay.events" :key="i" class="flex space-x-2.5 items-start">
+                    <div class="w-12 text-right pt-1.5 flex-shrink-0">
+                        <span class="text-[10px] font-mono font-bold bg-[#7A624E] text-white px-1 py-0.5 rounded shadow-sm">{{ event.time }}</span>
+                    </div>
+                    <div class="flex-1 bg-white rounded-xl p-3 border-2 border-[#E6D5B8] chiikawa-shadow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-black text-gray-800 text-xs flex items-center"><span class="mr-1">{{ event.icon }}</span> {{ event.title }}</h3>
+                                <p class="text-[11px] text-gray-500 mt-1 whitespace-pre-line leading-relaxed">{{ event.desc }}</p>
+                            </div>
+                            <a v-if="event.location" :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event.location)" target="_blank" class="bg-[#E6F2FF] text-blue-600 p-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center flex-shrink-0 ml-2">
+                                <i class="fa-solid fa-location-arrow"></i><span class="scale-90 mt-0.5">導航</span>
+                            </a>
                         </div>
-                        <a v-if="event.location" :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event.location)" target="_blank" class="bg-[#E6F2FF] text-blue-600 p-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center flex-shrink-0 ml-2">
-                            <i class="fa-solid fa-location-arrow"></i><span class="scale-90 mt-0.5">導航</span>
-                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer class="text-center py-8 text-[10px] text-gray-400 font-bold">
+
+        <div v-if="currentTab === 'ledger'" class="px-4 mt-4 space-y-4 pb-12">
+            
+            <div class="bg-[#E8F8F5] rounded-xl p-2.5 text-center text-xs font-bold text-teal-700 border border-[#A3E4D7]">
+                💱 當前匯率設定：100 JPY = {{ fxRate }} HKD
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 border-2 border-[#E6D5B8] chiikawa-shadow">
+                <h3 class="text-sm font-black text-[#513C2A] mb-3 flex items-center">
+                    <i class="fa-solid fa-users-viewfinder mr-1.5 text-pink-500"></i> 成員資產總計 (HKD)
+                </h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <div v-for="member in members" :key="member.id" class="flex justify-between items-center bg-gray-50 p-2 rounded-xl border border-gray-100">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl">{{ member.avatar }}</span>
+                            <span class="text-xs font-bold text-gray-800">{{ member.name }}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-gray-400">已付總額: ${{ formatNum(member.totalPaid) }}</div>
+                            <div class="text-xs font-black" :class="member.balance >= 0 ? 'text-green-600' : 'text-red-500'">
+                                {{ member.balance >= 0 ? '應收' : '應付' }}: ${{ formatNum(Math.abs(member.balance)) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 border-2 border-[#E6D5B8] chiikawa-shadow space-y-3">
+                <h3 class="text-sm font-black text-[#513C2A] flex items-center">
+                    <i class="fa-solid fa-feather-pointed mr-1.5 text-blue-500"></i> 快速即時記帳
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" v-model="form.title" placeholder="項目 (例如: 一蘭拉麵)" class="border-2 border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:border-[#FF6B8B] focus:outline-none">
+                    <div class="flex border-2 border-gray-200 rounded-xl overflow-hidden text-xs">
+                        <select v-model="form.currency" class="bg-gray-100 px-1 font-bold text-gray-600 outline-none">
+                            <option value="HKD">HKD $</option>
+                            <option value="JPY">JPY ¥</option>
+                        </select>
+                        <input type="number" v-model.number="form.amount" placeholder="金額" class="w-full px-2 py-1.5 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="text-xs font-bold text-gray-500">誰人付款：</div>
+                <div class="flex flex-wrap gap-1.5">
+                    <button v-for="m in members" :key="m.id" @click="form.payer = m.id" :class="form.payer === m.id ? 'bg-[#FFD1DC] border-[#FF6B8B] text-gray-800 font-black' : 'bg-gray-50 border-gray-200 text-gray-500'" class="flex items-center space-x-1 px-2.5 py-1 rounded-lg border text-[11px] transition-all">
+                        <span>{{ m.avatar }}</span><span>{{ m.name.split(' ')[0] }}</span>
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center text-xs font-bold text-gray-500 pt-1">
+                    <span>分攤成員 (To 挑選成員)：</span>
+                    <button @click="selectAllTargets" class="text-[10px] text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">To 全部人 ➔</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                    <button v-for="m in members" :key="m.id" @click="toggleTarget(m.id)" :class="form.targets.includes(m.id) ? 'bg-teal-50 border-teal-500 text-teal-700 font-black' : 'bg-gray-50 border-gray-100 text-gray-400'" class="flex items-center space-x-1 px-2 py-1 rounded-lg border text-[11px] transition-all">
+                        <i class="fa-solid" :class="form.targets.includes(m.id) ? 'fa-circle-check text-teal-600' : 'fa-circle opacity-20'"></i>
+                        <span>{{ m.avatar }}</span><span>{{ m.name.split(' ')[0] }}</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-4 text-xs font-bold text-gray-600 pt-1">
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="radio" v-model="form.type" value="公數" class="text-[#FF6B8B] focus:ring-0">
+                        <span>🏮 公數支出</span>
+                    </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="radio" v-model="form.type" value="私人" class="text-purple-500 focus:ring-0">
+                        <span>🛍️ 私人代購/數</span>
+                    </label>
+                </div>
+
+                <button @click="addRecord" class="w-full bg-[#FF6B8B] text-white py-2 rounded-xl text-xs font-black shadow-md hover:bg-[#ff5579] transition-all">
+                    ➕ 記錄並即時分帳
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 border-2 border-[#E6D5B8] chiikawa-shadow">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-black text-[#513C2A] flex items-center">
+                        <i class="fa-solid fa-list-check mr-1.5 text-purple-500"></i> 流水明細紀錄
+                    </h3>
+                    <div class="flex items-center space-x-2">
+                        <button @click="clearAllRecords" v-if="records.length > 0" class="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">🧹 清空帳目</button>
+                        <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-400 font-bold">共 {{ records.length }} 筆</span>
+                    </div>
+                </div>
+
+                <div v-if="records.length === 0" class="text-center py-6 text-xs text-gray-400 font-bold">
+                    暫時未有任何帳目紀錄 🐾
+                </div>
+
+                <div class="space-y-2.5 max-h-[350px] overflow-y-auto no-scrollbar" v-else>
+                    <div v-for="r in sortedRecords" :key="r.id" class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <div class="flex items-center space-x-1.5">
+                                <span :class="r.type === '公數' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'" class="text-[9px] px-1.5 py-0.2 rounded font-bold">{{ r.type }}</span>
+                                <h4 class="font-black text-xs text-gray-800 truncate">{{ r.title }}</h4>
+                            </div>
+                            <div class="text-[10px] text-gray-400 mt-1 flex flex-wrap items-center">
+                                <span>由 {{ getMemberName(r.payer) }} 付款</span>
+                                <span class="mx-1">➔</span>
+                                <span>分擔: {{ r.targets.map(id => getMemberName(id).split(' ')[0]).join(', ') }}</span>
+                            </div>
+                        </div>
+                        <div class="text-right flex items-center space-x-2">
+                            <div>
+                                <div class="text-xs font-black text-gray-800">HKD ${{ formatNum(r.amountHKD) }}</div>
+                                <div class="text-[9px] text-gray-400" v-if="r.currency === 'JPY'">原幣: JPY ¥{{ formatNum(r.amountRaw) }}</div>
+                            </div>
+                            <button @click="deleteRecord(r.id)" class="text-red-400 hover:text-red-600 p-1 transition-all">
+                                <i class="fa-regular fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="text-center py-6 text-[10px] text-gray-400 font-bold">
             <p>ヘ( ^o^)ノ 衝啊！！！買爆 Chiikawa 公仔～ 🛒</p>
         </footer>
 
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue;
+        const { createApp, ref, computed, watch } = Vue;
         createApp({
             setup() {
+                const currentTab = ref('itinerary');
                 const activeDay = ref(0);
+                const fxRate = ref(5.1); // 預設 100 JPY = 5.1 HKD
+
+                const members = ref([
+                    { id: 'leo', name: 'Leo 小哥', avatar: '🐻', totalPaid: 0, balance: 0 },
+                    { id: 'yan', name: '欣', avatar: '🐱', totalPaid: 0, balance: 0 },
+                    { id: 'sister1', name: '大家姐', avatar: '🐶', totalPaid: 0, balance: 0 },
+                    { id: 'sister2', name: '二家姐', avatar: '🐭', totalPaid: 0, balance: 0 },
+                    { id: 'yi', name: '家怡', avatar: '🐰', totalPaid: 0, balance: 0 }
+                ]);
+
+                const form = ref({
+                    title: '',
+                    amount: null,
+                    currency: 'JPY',
+                    payer: 'leo',
+                    targets: ['leo', 'yan', 'sister1', 'sister2', 'yi'],
+                    type: '公數'
+                });
+
+                // 【升級：從 LocalStorage 讀取歷史數據，沒有的話就給一筆初始範例】
+                const savedRecords = localStorage.getItem('leo_tokyo_ledger');
+                const records = ref(savedRecords ? JSON.parse(savedRecords) : [
+                    { id: 1, title: '預支迪士尼海洋門票', amountRaw: 45000, amountHKD: 2295, currency: 'JPY', payer: 'leo', targets: ['leo', 'yan', 'sister1', 'sister2', 'yi'], type: '公數', timestamp: Date.now() - 100000 }
+                ]);
+
+                const formatNum = (num) => {
+                    if (num === null || isNaN(num)) return '0';
+                    return Number(num).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                };
+
+                const getMemberName = (id) => {
+                    const m = members.value.find(member => member.id === id);
+                    return m ? m.avatar + ' ' + m.name : id;
+                };
+
+                const selectAllTargets = () => {
+                    form.value.targets = members.value.map(m => m.id);
+                };
+
+                const toggleTarget = (id) => {
+                    const idx = form.value.targets.indexOf(id);
+                    if (idx > -1) {
+                        form.value.targets.splice(idx, 1);
+                    } else {
+                        form.value.targets.push(id);
+                    }
+                };
+
+                const addRecord = () => {
+                    if (!form.value.title || !form.value.amount || form.value.targets.length === 0) {
+                        alert('❌ 請填寫完整項目、金額及至少選擇一位分攤成員！');
+                        return;
+                    }
+
+                    let amtHKD = form.value.amount;
+                    if (form.value.currency === 'JPY') {
+                        amtHKD = (form.value.amount / 100) * fxRate.value;
+                    }
+
+                    records.value.push({
+                        id: Date.now(),
+                        title: form.value.title,
+                        amountRaw: form.value.amount,
+                        amountHKD: amtHKD,
+                        currency: form.value.currency,
+                        payer: form.value.payer,
+                        targets: [...form.value.targets],
+                        type: form.value.type,
+                        timestamp: Date.now()
+                    });
+
+                    form.value.title = '';
+                    form.value.amount = null;
+                };
+
+                const deleteRecord = (id) => {
+                    records.value = records.value.filter(r => r.id !== id);
+                };
+
+                const clearAllRecords = () => {
+                    if (confirm('🧹 確定要清空所有記帳明細嗎？（清空後將無法復原）')) {
+                        records.value = [];
+                    }
+                };
+
+                // 【核心：監聽流水帳，自動計數 + 自動存入 LocalStorage】
+                watch(records, (newRecords) => {
+                    localStorage.setItem('leo_tokyo_ledger', JSON.stringify(newRecords));
+
+                    members.value.forEach(m => {
+                        m.totalPaid = 0;
+                        m.balance = 0;
+                    });
+
+                    newRecords.forEach(r => {
+                        const payerObj = members.value.find(m => m.id === r.payer);
+                        if (payerObj) payerObj.totalPaid += r.amountHKD;
+
+                        const shareCount = r.targets.length;
+                        const perShare = r.amountHKD / shareCount;
+
+                        r.targets.forEach(targetId => {
+                            const targetObj = members.value.find(m => m.id === targetId);
+                            if (targetObj) targetObj.balance -= perShare;
+                        });
+
+                        if (payerObj) payerObj.balance += r.amountHKD;
+                    });
+                }, { immediate: true, deep: true });
+
+                const sortedRecords = computed(() => {
+                    return [...records.value].sort((a, b) => b.timestamp - a.timestamp);
+                });
+
+                // 固定行程資料
                 const itinerary = ref([
-                    { date: '5月24日', week: '星期日', area: '香港 ➔ 東京池袋', temp: '18°C - 24°C', events: [{ time: '09:05', title: '香港國際機場起飛', desc: '航班 HB320 (09:05-14:50)，行李限額20KG\n上雞啦！✈️', icon: '✈️' }, { time: '14:50', title: '抵達東京成田機場', desc: '行行企企等過關、攞行李 🎒', icon: '🛬' }, { time: '15:30', title: '搭 Skyliner 前往池袋', desc: '車程約60分鐘，車費 2760yen\n成田機場 ➔ 池袋', icon: '🚆', location: '成田空港第2ビル駅' }, { time: '18:00', title: '酒店 Check-in', desc: 'KOKO酒店池袋東下榻（池袋太陽城）', icon: '🏨', location: 'KOKO HOTEL Ikebukuro Higashi' }] },
+                    { date: '5月24日', week: '星期日', area: '香港 ➔ 東京池袋', temp: '18°C - 24°C', events: [{ time: '09:05', title: '香港國際機場起飛', desc: '航班 HB320 (09:05-14:50)，行李限額20KG\n上飛機啦！✈️', icon: '✈️' }, { time: '14:50', title: '抵達東京成田機場', desc: '行行企企等過關、攞行李 🎒', icon: '🛬' }, { time: '15:30', title: '搭 Skyliner 前往池袋', desc: '車程約60分鐘，車費 2760yen\n成田機場 ➔ 池袋', icon: '🚆', location: '成田空港第2ビル駅' }, { time: '18:00', title: '酒店 Check-in', desc: 'KOKO酒店池袋東下榻（池袋太陽城附近）', icon: '🏨', location: 'KOKO HOTEL Ikebukuro Higashi' }] },
                     { date: '5月25日', week: '星期一', area: '台場 / 豐洲', temp: '17°C - 23°C', events: [{ time: '10:00', title: '出發前往豐洲市場', desc: '池袋 ➔ 豐洲市場 (車程40mins)', icon: '🚃', location: '豐洲市場' }, { time: '11:00', title: '豐洲市場食壽司/魚生Don', desc: '千客萬來掃街、足湯浸浸 ♨️', icon: '🍣', location: '東京豐洲萬葉俱樂部' }, { time: '15:30', title: '豐洲 ➔ 台場', desc: '車程約 15 分鐘 🚌', icon: '🚌' }, { time: '16:00', title: '台場行街 & Joypolis', desc: '暢玩室內主題樂園、睇高達 👾', icon: '👾', location: '東京Joypolis' }, { time: '19:00', title: '返歸池袋', desc: '酒店休息或周圍搵嘢食 🛌', icon: '🛌' }] },
                     { date: '5月26日', week: '星期二', area: '涉谷 / 自由之丘 / 原宿', temp: '19°C - 25°C', events: [{ time: '10:00', title: '池袋周圍行下', desc: '睇下野，感受上午的池袋 🚶', icon: '🚶' }, { time: '12:00', title: '午餐：食河豚 @ 池袋', desc: '【已卜！】美味河豚料理大餐 🐡', icon: '🍱', location: '玄品 河豚 池袋' }, { time: '13:30', title: '池袋 ➔ 涉谷', desc: '車程30分鐘 🚃', icon: '🚃' }, { time: '14:00', title: '涉谷/自由之丘/原宿散策', desc: '再周圍行下，消化下 🛍️', icon: '🛍️', location: '渋谷駅' }, { time: '15:20', title: 'Shibuya Sky 高空觀景', desc: '【已卜 15:20！】俯瞰東京全景 ☁️', icon: '☁️', location: 'SHIBUYA SKY' }, { time: '17:30', title: '無咩野做就ON99周圍行下', desc: '逛街、睇野、感受日本潮流 🤪', icon: '🤪' }] },
-                    { date: '5月27日', week: '星期三', area: '東京迪士尼海洋 🌊', temp: '18°C - 24°C', events: [{ time: '07:00', title: '池袋出發 ➔ 迪士尼海洋', desc: '車程約60分鐘，提早去卡位！🏰', icon: '🏰', location: '東京迪士尼海洋' }, { time: '08:30', title: '迪士尼海洋 瘋狂開玩', desc: '必玩：\n1. 魔雪奇緣：安娜與艾莎的冰雪之旅❄️\n2. 翱翔：騰空飛翔✈️\n3. 玩具總動員瘋狂遊戲屋🎯\n4. 驚魂古塔😱\n5. 地心探險之旅🌋\n6. 樂佩公主天燈盛會🏮', icon: '🎢' }, { time: '19:30', title: '夜間水上大匯演', desc: '堅信！～海洋之願～ 必睇！🌟', icon: '🎆' }, { time: '21:30', title: '返歸池袋酒店', desc: '帶住滿滿戰利品回程 🛌', icon: '🛌' }] },
-                    { date: '5月28日', week: '星期外', area: '川越小江戶一日遊 🪵', temp: '16°C - 22°C', events: [{ time: '09:30', title: '池袋 ➔ 川越', desc: '搭東武東上線，用 KAWAGOE DISCOUNT PASS 🚆', icon: '🚆', location: '池袋駅' }, { time: '10:30', title: '川越 gogogo!', desc: '熊野神社：洗錢錢 🪙\n小川菊：食鰻魚飯 (落地之後即刻去拎飛 ❗)', icon: '🍱', location: '小川菊' }, { time: '13:30', title: '藏造老街 & 時之鐘', desc: '行街街買 chiikawa 公仔卡哇哇 🥹\n星巴克川越鐘樓店 ☕', icon: '🛍️', location: '川越時之鐘' }, { time: '15:30', title: '冰川神社', desc: '釣鯛魚御守 🐟 祈求好緣分', icon: '⛩️', location: '川越冰川神社' }] },
+                    { date: '5月27日', week: '星期三', area: '東京迪士尼海洋 🌊', temp: '18°C - 24°C', events: [{ time: '07:00', title: '池袋出發 ➔ 迪士尼海洋', desc: '車程約60分鐘，提早去卡位！🏰', icon: '🏰', location: '東京迪士尼海洋' }, { time: '08:30', title: '迪士尼海洋 瘋狂開玩', desc: '必玩：\n1. 魔雪奇緣❄️\n2. 翱翔：騰空飛翔✈️\n3. 玩具總動員🎯\n4. 驚魂古塔😱\n5. 地心探險之旅🌋\n6. 樂佩公主天燈盛會🏮', icon: '🎢' }, { time: '19:30', title: '夜間水上大匯演', desc: '堅信！～海洋之願～ 必睇！🌟', icon: '🎆' }, { time: '21:30', title: '返歸池袋酒店', desc: '帶住滿滿戰利品回程 🛌', icon: '🛌' }] },
+                    { date: '5月28日', week: '星期四', area: '川越小江戶一日遊 🪵', temp: '16°C - 22°C', events: [{ time: '09:30', title: '池袋 ➔ 川越', desc: '搭東武東上線，用 KAWAGOE DISCOUNT PASS 🚆', icon: '🚆', location: '池袋駅' }, { time: '10:30', title: '川越 gogogo!', desc: '熊野神社：洗錢錢 🪙\n小川菊：食鰻魚飯 (落地之後即刻去拎飛 ❗)', icon: '🍱', location: '小川菊' }, { time: '13:30', title: '藏造老街 & 時之鐘', desc: '行街街買 chiikawa 公仔卡哇哇 🥹\n星巴克川越鐘樓店 ☕', icon: '🛍️', location: '川越時之鐘' }, { time: '15:30', title: '冰川神社', desc: '釣鯛魚御守 🐟 祈求好緣分', icon: '⛩️', location: '川越冰川神社' }] },
                     { date: '5月29日', week: '星期五', area: '秋葉原 / 東京車站 🛍️', temp: '18°C - 25°C', events: [{ time: '10:00', title: '出發去食 I\'m donut ?', desc: '超人氣生甜甜圈，準備排隊！🍩', icon: '🍩', location: 'I\'m donut? 中目黑' }, { time: '11:30', title: '食完出發：池袋 ➔ 秋葉原', desc: '車程約 20 分鐘 🚃', icon: '🚃' }, { time: '12:00', title: '秋葉原行行行', desc: '去下女僕男執事 cafe 🧸', icon: '🧸', location: '秋葉原駅' }, { time: '16:15', title: '秋葉原 ➔ 東京站', desc: '車程5分鐘 🚃', icon: '🚃' }, { time: '16:30', title: '東京站一番街狂購', desc: '東京車站一番街買手信買手信！🛍️ 最後衝刺！', icon: '🎁', location: '東京車站一番街' }] },
-                    { date: '5月30日', week: '星期六', area: '東京池袋 ➔ 香港', temp: '19°C - 26°C', events: [{ time: '09:00', title: '最後衝刺啦!!!!!', desc: '池袋最後補貨、買藥妝、吃早餐 🔥', icon: '🔥' }, { time: '11:30', title: '池袋站出發 ➔ 機場', desc: '12:22 搭 Skyliner 車，13:00 到達機場 🚆', icon: '🚆', location: '池袋駅' }, { time: '15:50', title: '飛機起飛返港 (HB321)', desc: '要返歸啦!!!要回到現實世界啦~~嗚嗚嗚~~~😭 (15:50-19:45)', icon: '✈️' }, { time: '19:45', title: '抵達香港 (T1)', desc: '回到十汁吉吉的家 🏠，完美的假期結束！', icon: '🏠' }] }
+                    { date: '5月30日', week: '星期六', area: '東京池袋 ➔ 香港', temp: '19°C - 26°C', events: [{ time: '09:00', title: '最後衝刺啦!!!!!', desc: '池袋最後補貨、買藥妝、吃早餐 🔥', icon: '🔥' }, { time: '11:30', title: '池袋站出發 ➔ 機場', desc: '12:22 搭 Skyliner 車，13:00 到達機場 🚆', icon: '🚆', location: '池袋駅' }, { time: '15:50', title: '飛機起飛返港 (HB321)', desc: '要返歸啦!!!要回到現實世界啦~~嗚嗚嗚~~~😭 (15:50-19:45)', icon: '✈️' }, { time: '19:45', title: '抵達香港 (T1)', desc: '回到溫暖的家 🏠，完美的假期結束！', icon: '🏠' }] }
                 ]);
+
                 const currentDay = computed(() => itinerary.value[activeDay.value]);
-                return { activeDay, itinerary, currentDay };
+
+                return {
+                    currentTab, activeDay, itinerary, currentDay,
+                    members, form, records, fxRate,
+                    formatNum, getMemberName, selectAllTargets, toggleTarget, addRecord, deleteRecord, clearAllRecords, sortedRecords
+                };
             }
         }).mount('#app');
     </script>
